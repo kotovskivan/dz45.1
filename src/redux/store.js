@@ -1,6 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
-import counterReducer from './counterSlice'
+import counter from './counterSlice'
+import todos from './todosSlice'
+
+const logger = store => next => action => {
+  const result = next(action)
+  return result
+}
 
 export default configureStore({
-  reducer: { counter: counterReducer }
+  reducer: { counter, todos },
+  middleware: getDefault => getDefault().concat(logger)
 })
