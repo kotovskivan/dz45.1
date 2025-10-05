@@ -1,6 +1,5 @@
-
 import { useSelector, useDispatch } from 'react-redux'
-import { fetchTodos, toggleLocal, clear } from '../redux/todosSlice'
+import { fetchRequest, toggleLocal, clear } from '../redux/todosSlice'
 import { selectTodos, selectTodosStatus, selectTodosError, selectCompletedTodos } from '../redux/selectors'
 
 export default function Todos() {
@@ -11,21 +10,56 @@ export default function Todos() {
   const dispatch = useDispatch()
 
   const loading = status === 'loading'
+  const failed = status === 'failed'
+  const succeeded = status === 'succeeded'
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-        <button onClick={() => dispatch(fetchTodos())} disabled={loading} style={{ padding: '10px 16px', borderRadius: '10px', border: '1px solid #2563eb', background: '#3b82f6', color: '#0b1324', fontWeight: 700, cursor: 'pointer', opacity: loading ? .6 : 1 }}>
-          {loading ? 'Завантаження...' : 'Завантажити задачі'}
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <button
+          onClick={() => dispatch(fetchRequest())}
+          disabled={loading}
+          style={{
+            padding: '10px 16px',
+            borderRadius: '10px',
+            border: '1px solid #2563eb',
+            background: '#3b82f6',
+            color: '#0b1324',
+            fontWeight: 700,
+            cursor: 'pointer',
+            opacity: loading ? 0.6 : 1,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {loading ? '⏳ Завантаження...' : '🔄 Завантажити задачі'}
         </button>
-        <button onClick={() => dispatch(clear())} disabled={!items.length} style={{ padding: '10px 16px', borderRadius: '10px', border: '1px solid #374151', background: '#1f2937', color: '#e5e7eb', cursor: items.length ? 'pointer' : 'not-allowed', opacity: items.length ? 1 : .6 }}>
-          Очистити
+
+        <button
+          onClick={() => dispatch(clear())}
+          disabled={!items.length}
+          style={{
+            padding: '10px 16px',
+            borderRadius: '10px',
+            border: '1px solid #374151',
+            background: '#1f2937',
+            color: '#e5e7eb',
+            cursor: items.length ? 'pointer' : 'not-allowed',
+            opacity: items.length ? 1 : 0.6,
+          }}
+        >
+          🗑 Очистити
         </button>
+
+        {/* 🔹 Индикация статуса */}
+        {loading && <span style={{ color: '#60a5fa' }}>Йде запит до API...</span>}
+        {succeeded && <span style={{ color: '#22c55e' }}>✅ Дані оновлено!</span>}
+        {failed && <span style={{ color: '#f87171' }}>❌ Помилка: {error}</span>}
       </div>
 
-      {status === 'failed' && <div style={{ marginTop: '10px', color: '#fca5a5' }}>Помилка: {error}</div>}
-
-      <div style={{ marginTop: '16px', opacity: .85 }}>Виконано: {completed.length} з {items.length}</div>
+      <div style={{ marginTop: '16px', opacity: 0.85 }}>
+        Виконано: {completed.length} з {items.length}
+      </div>
 
       <ul style={{ marginTop: '12px', paddingLeft: '18px' }}>
         {items.map(t => (

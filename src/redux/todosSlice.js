@@ -1,42 +1,20 @@
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-export const fetchTodos = createAsyncThunk('todos/fetch', async () => {
-  const res = await fetch('https://jsonplaceholder.typicode.com/todos?_limit=5')
-  if (!res.ok) throw new Error('Помилка завантаження')
-  return await res.json()
-})
+import { createSlice } from '@reduxjs/toolkit'
 
 const slice = createSlice({
   name: 'todos',
   initialState: { items: [], status: 'idle', error: null },
   reducers: {
+    fetchRequest: state => { state.status = 'loading'; state.error = null },
+    fetchSuccess: (state, action) => { state.status = 'succeeded'; state.items = action.payload },
+    fetchFailure: (state, action) => { state.status = 'failed'; state.error = action.payload || 'Помилка' },
     toggleLocal: (state, action) => {
       const t = state.items.find(x => x.id === action.payload)
       if (t) t.completed = !t.completed
     },
-    clear: state => {
-      state.items = []
-      state.status = 'idle'
-      state.error = null
-    }
-  },
-  extraReducers: builder => {
-    builder
-      .addCase(fetchTodos.pending, state => {
-        state.status = 'loading'
-        state.error = null
-      })
-      .addCase(fetchTodos.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        state.items = action.payload
-      })
-      .addCase(fetchTodos.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.error.message || 'Помилка'
-      })
+    clear: state => { state.items = []; state.status = 'idle'; state.error = null }
   }
 })
 
-export const { toggleLocal, clear } = slice.actions
+export const { fetchRequest, fetchSuccess, fetchFailure, toggleLocal, clear } = slice.actions
 export default slice.reducer
